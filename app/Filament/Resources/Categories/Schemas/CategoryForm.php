@@ -5,7 +5,7 @@ namespace App\Filament\Resources\Categories\Schemas;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Schemas\Schema;
-
+use Filament\Forms\Components\FileUpload;
 class CategoryForm
 {
     public static function configure(Schema $schema): Schema
@@ -13,13 +13,15 @@ class CategoryForm
         return $schema
             ->components([
                 TextInput::make('name')
+                    ->label('Nombre categoría')
                     ->required(),
-                Textarea::make('image_url')
-                    ->columnSpanFull(),
-                TextInput::make('created_by')
-                    ->numeric(),
-                TextInput::make('updated_by')
-                    ->numeric(),
+               FileUpload::make('image_url')
+                ->label('Imagen')
+                ->image()
+                ->directory('categories')
+                ->panelLayout('integrated')
+                ->visibility('public') // 👈 importante
+                ->columnSpanFull(),
             ]);
     }
 }

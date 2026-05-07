@@ -5,7 +5,11 @@ namespace App\Filament\Resources\Products\Schemas;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Schemas\Schema;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Select;
+use Filament\Support\RawJs;
+
 
 class ProductForm
 {
@@ -20,27 +24,43 @@ class ProductForm
                 TextInput::make('cost_price')
                     ->required()
                     ->numeric()
-                    ->prefix('$'),
+                    ->prefix('Gs.'),
                 TextInput::make('profit_percentage')
                     ->required()
                     ->numeric(),
                 TextInput::make('final_price')
                     ->required()
-                    ->numeric()
-                    ->prefix('$'),
+                    ->integer()
+                    ->prefix('Gs.')
+                    ->mask(RawJs::make('$money($input)')),
                 TextInput::make('stock')
                     ->required()
                     ->numeric()
                     ->default(0),
-                TextInput::make('category_id')
-                    ->numeric(),
+                Select::make('category_id')
+                    ->label('Categoría')
+                    ->relationship('category', 'name') // usa la relación definida en el modelo Product
+                    ->searchable()
+                    ->required(),
                 // 📸 Campo para subir múltiples imágenes
-                FileUpload::make('images')
-                    ->multiple() // permite varias
-                    ->image()
-                    ->directory('products') // carpeta en storage/app/public/products
-                    ->maxFiles(5) // opcional: límite de cantidad
-                    ->columnSpanFull(),
+                Repeater::make('images')
+                    ->relationship() // 🔥 esto conecta con product_images
+                    ->schema([
+                        FileUpload::make('url')
+                            ->image()
+                            ->directory('products')
+                            ->required(),
+
+                        \Filament\Forms\Components\Toggle::make('is_main')
+                        ->label('Imagen Principal'),
+
+                        \Filament\Forms\Components\TextInput::make('position')
+                            ->label('Posición')
+                            ->numeric()
+                            ->default(0),
+                    ])
+                    ->columns(3)
+                    ->columnSpanFull()
             ]);
     }
 }
